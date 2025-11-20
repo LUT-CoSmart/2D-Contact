@@ -17,13 +17,13 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 5;
-dy1 = 1;
+dx1 = 16;
+dy1 = 2;
 
-dx2 = 5;
+dx2 = 8;
 dy2 = 1;
 %##################### Contact ############################
-approach = 5; % 0 - none; 
+approach = 1; % 0 - none; 
               % 1 - penalty 
               % 2 - Nitsche (linear of gap), 3- Nitsche (nonlinear of gap), 4 - all items    
               % 5 - Lagrange multiplier    
@@ -32,15 +32,12 @@ approach = 5; % 0 - none;
               % 8 - Lagrange multiplier (nonlinear constrain)
               % 9 - perturbed Lagrangian method 
               % 10 - perturbed Lagrangian method (nonlinear constrain) 
-              % 11 - Test (Lagrange multiplier - many conditions)
-
 % Hyperparameters 
 pn = 1e10;  % penalty
-
-PointsofInterest = "nodes"; % options: "nodes", "Gauss", "LinSpace" 
+PointsofInterest = "LinSpace"; % options: "nodes", "Gauss", "LinSpace" 
 % N.B.: "LinSpace" with n == 2 is equal to "nodes"; 
 % Number of "LinSpace" + 1 = number of n in "Gauss" ('cause the first point of elements is omitted)
-n = 5; % number of points per segment (Gauss & LinSpace points)
+n = 3; % number of points per segment (Gauss & LinSpace points)
 
 ContactPointfunc  = ContactPointSetting(PointsofInterest,n);
 Gapfunc = GapCalculationSetting(PointsofInterest, n);
@@ -103,7 +100,7 @@ Body2.contact.nodalid = FindGlobNodalID(Body2.P0,Body2.contact.loc,Body2.shift);
 
 %##################### Newton iter. parameters ######################
 imax=40;
-tol=1e-3;   
+tol=1e-4;   
 type = "cubic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
 steps= 20;
 
@@ -173,7 +170,7 @@ PrintResults(Body1)
 PrintResults(Body2)
 gam = 1/pn;
 hold on 
-vis = "sigma_yy"; % options: "frame", "ux", "uy", "u_total", "sigma_xx", "sigma_yy", "sigma_xy" 
+vis = "uy"; % options: "frame", "ux", "uy", "u_total", "sigma_xx", "sigma_yy", "sigma_xy" 
 Visualization(Body1,fig_number,vis,ShowNodeNumbers);
 Visualization(Body2,fig_number,vis,ShowNodeNumbers);
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

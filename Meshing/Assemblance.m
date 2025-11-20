@@ -1,5 +1,6 @@
 function [uu_bc, deltaf,lambda_next] = Assemblance(Body1,Body2,Fc,Kc,GapNab,approach,penalty,lambda)
     
+    lambda_next = lambda;
     bc = [Body1.bc Body2.bc]; % total logical vector of constrains
     Fext = [Body1.Fext.vec; Body2.Fext.vec]; % Assemblance of external forces
     
@@ -24,7 +25,8 @@ function [uu_bc, deltaf,lambda_next] = Assemblance(Body1,Body2,Fc,Kc,GapNab,appr
         K_bc = Ke_bc + lambda * Kc_bc; % for Lagrange multiplier Kc = zero-matrix
 
         K_bc = [     K_bc GapNab_bc;
-                GapNab_bc'         0];   
+                GapNab_bc'        0];  
+        
         ff_bc = [ff_bc + lambda*GapNab_bc; 0];
 
     elseif (approach == 9) || (approach == 10) % perturbed Lagrangian method & perturbed Lagrangian method (nonlinear constrain)
@@ -44,15 +46,6 @@ function [uu_bc, deltaf,lambda_next] = Assemblance(Body1,Body2,Fc,Kc,GapNab,appr
                 
         ff_bc = ff_bc + lambda; % contributions from the updated contact forces after the previous iteration  
         
-
-    elseif approach == 11 
-
-           % [~,m] = size(Kc_bc);
-           % K_bc = Ke_bc; % stiffness matrices assemblance
-           % K_bc = [    K_bc + Kc_bc*lambda    Kc_bc;
-           %            Kc_bc'    zeros(m)];   
-           % ff_bc = [ff_bc+Kc_bc*lambda; zeros(m,1)]; 
-
     end
    
     uu_bc = -K_bc\ff_bc; 
