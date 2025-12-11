@@ -16,7 +16,7 @@ function [ContactPoints, ContactPointsElements] = ContactPointNode(ContactBody)
     
     ContactPointsElements = ContactBody.contact.nodalid(1); % taking the first node number
 
-    for ii = 2:size(ContactPoints,1) 
+    for ii = 2:size(ContactPoints,1) % this works only due to the fact that, if you are ath this function then cont point == cont nodes 
         % idea that on the edge, two nodes are uniquely belong to one element only 
         ElemenNumber = find(any(nloc_cont == ii-1, 2) & any(nloc_cont == ii, 2)); 
         ContactPointsElements = [ContactPointsElements; ElemenNumber]; % multiplication to correlate with points

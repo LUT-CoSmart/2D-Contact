@@ -40,16 +40,16 @@ function Fc = ContactForce(ContactBody,TargetBody,penalty,approach,ContactPointf
                X_targ = ContactGeometry.Coords(:,i);
                U_targ = ContactGeometry.Disp(:,i);
                Sigma_targ = Sigma_2412(TargetBody.E,TargetBody.nu,U_targ,X_targ,xi_targ(1),xi_targ(2));
-                          
-                         
+                                                   
                % Normal force difference 
-               Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;                          
+               % Sigma_n = Normal_cont' * Sigma_cont * Normal_cont - Normal_targ' * Sigma_targ * Normal_targ;  
+               Sigma_n = Normal_cont' * (Sigma_cont - Sigma_targ) * Normal_cont; 
                lambda = Gap * norm(Sigma_n);
                
                d_lambda_targ = norm(Sigma_n)*Normal_targ;
                d_lambda_cont = norm(Sigma_n)*Normal_cont; 
                           
-               if approach >2 % adding nonlinear of gap    
+               if approach > 2 % adding nonlinear of gap    
                     
                    nabla_sigma_targ = nabla_sigma_2412(TargetBody.E,TargetBody.nu,U_targ,X_targ,xi_targ(1),xi_targ(2));                
                    Nabla_Sigma_n_targ = NablaMultiplication(nabla_sigma_targ,Normal_targ);
@@ -57,7 +57,9 @@ function Fc = ContactForce(ContactBody,TargetBody,penalty,approach,ContactPointf
                    nabla_sigma_cont = nabla_sigma_2412(ContactBody.E,ContactBody.nu,U_cont,X_cont,xi_cont(1),xi_cont(2));
                    Nabla_Sigma_n_cont = NablaMultiplication(nabla_sigma_cont,Normal_cont); 
     
-                   Nabla_Sigma_n = Normal_cont' * Nabla_Sigma_n_cont * Normal_cont + Normal_targ' * Nabla_Sigma_n_targ * Normal_targ; 
+                   % Nabla_Sigma_n = Normal_cont' * Nabla_Sigma_n_cont * Normal_cont + Normal_targ' * Nabla_Sigma_n_targ * Normal_targ; 
+                   Nabla_Sigma_n = Normal_cont' * (Nabla_Sigma_n_cont + Nabla_Sigma_n_targ) * Normal_cont; 
+                   
                    d_lambda_targ = d_lambda_targ + Gap * Nabla_Sigma_n * Normal_targ;
                    d_lambda_cont = d_lambda_cont + Gap * Nabla_Sigma_n * Normal_cont; 
                end 

@@ -17,13 +17,13 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 16;
+dx1 = 8;
 dy1 = 2;
 
-dx2 = 8;
+dx2 = 4;
 dy2 = 1;
 %##################### Contact ############################
-approach = 1; % 0 - none; 
+approach = 3; % 0 - none; 
               % 1 - penalty 
               % 2 - Nitsche (linear of gap), 3- Nitsche (nonlinear of gap), 4 - all items    
               % 5 - Lagrange multiplier    
@@ -34,7 +34,7 @@ approach = 1; % 0 - none;
               % 10 - perturbed Lagrangian method (nonlinear constrain) 
 % Hyperparameters 
 pn = 1e10;  % penalty
-PointsofInterest = "LinSpace"; % options: "nodes", "Gauss", "LinSpace" 
+PointsofInterest = "nodes"; % options: "nodes", "Gauss", "LinSpace" 
 % N.B.: "LinSpace" with n == 2 is equal to "nodes"; 
 % Number of "LinSpace" + 1 = number of n in "Gauss" ('cause the first point of elements is omitted)
 n = 3; % number of points per segment (Gauss & LinSpace points)

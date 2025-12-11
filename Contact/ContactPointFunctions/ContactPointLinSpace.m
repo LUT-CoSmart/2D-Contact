@@ -13,7 +13,7 @@ function [ContactPoints, ContactPointsElements] = ContactPointLinSpace(ContactBo
     
     ContactNodesPosition = [ContactNodesPosition_X ContactNodesPosition_Y]; % nodes of the contact surfaces of the contact body     
     
-    ContactPoints = ContactNodesPosition(1,:); % taking the first node position, otherwise later it will be omitted 
+    ContactPoints = ContactNodesPosition(1,:); % taking the first node position, later it will be omitted 
     ContactPointsElements = ContactBody.contact.nodalid(1); % taking the first node number
   
     % transition to Linspace points  
@@ -32,7 +32,7 @@ function [ContactPoints, ContactPointsElements] = ContactPointLinSpace(ContactBo
             yy = a(2)*ones(n,1); 
         end
     
-        % Following the Intercept theorem (Thales's theorem according Russian naming):
+        % Following the Intercept theorem (см. теорему Фалеса):
         % the function devide x- and y- axes in the same propotions 
         ContactPoints = [ContactPoints; xx(2:end) yy(2:end)]; % excluding the node from the previous devision
         ContactPointsElements = [ContactPointsElements; ElemenNumber*ones(n-1,1)]; % multiplication to correlate with points

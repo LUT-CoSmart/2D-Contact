@@ -7,6 +7,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
 
     Gap = [];
     Normal = [];
+
     ContactDofs = [];
     ContactCoordsXi = [];
     ContactCoords = [];
@@ -24,7 +25,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
         nloc_targ = TargetBody.nloc;
         
         % Checking the condition of the penalty approach
-        if Outcome.Gap < 0 % we have meaningful outcome from the search
+        if Outcome.Gap < 0 % we have meaningful results after the search
         
             % negative because after penetration direction from contact point
             % to its projection is opposite to outwards normal
@@ -38,6 +39,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
             [X_cont,U_cont] = GetCoorDisp(ElemenNumber,nloc_cont,ContactBody.P0,ContactBody.u);
             [xi_cont,eta_cont] = FindIsoCoord(X_cont,U_cont,ContactPoint');  % finding the isocoordinates of the contact point
             vec_cont = [xi_cont; eta_cont];
+            
             % index - element under consideration
             Index = Outcome.Index;
             DOFpositions_targ = TargetBody.xloc(Index,:);
@@ -47,7 +49,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
             Gap = [Gap gap];
-            Normal = [Normal Outcome.Normal]; % outwards normal (from the targeted body to contact one)
+            Normal = [Normal Outcome.Normal]; % outwards normal (from the target body to the contact one)
 
             ContactDofs = [ContactDofs DOFpositions_cont(:)];
             ContactCoordsXi = [ContactCoordsXi vec_cont];
