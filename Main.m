@@ -5,10 +5,13 @@ addpath("Forces")
 addpath("Meshing")
 addpath("ProcessAnalysis")
 addpath("Contact")
+
 %########## Reads element's data ###############################
 ElementData;   
+
 %########## Reads problem's data ###############################
 ProblemData;
+
 %########## Element positioning (from (0.0) coord. ) ###########
 Body1.shift.x = 0;
 Body1.shift.y = 0;
@@ -22,25 +25,6 @@ dy1 = 2;
 
 dx2 = 4;
 dy2 = 1;
-%##################### Contact ############################
-approach = 3; % 0 - none; 
-              % 1 - penalty 
-              % 2 - Nitsche (linear of gap), 3- Nitsche (nonlinear of gap), 4 - all items    
-              % 5 - Lagrange multiplier    
-              % 6 - penalty (simplified ): it's very simplified, even without gap redistribution over nodes              
-              % 7 - Augumented Lagrange multiplier
-              % 8 - Lagrange multiplier (nonlinear constrain)
-              % 9 - perturbed Lagrangian method 
-              % 10 - perturbed Lagrangian method (nonlinear constrain) 
-% Hyperparameters 
-pn = 1e10;  % penalty
-PointsofInterest = "nodes"; % options: "nodes", "Gauss", "LinSpace" 
-% N.B.: "LinSpace" with n == 2 is equal to "nodes"; 
-% Number of "LinSpace" + 1 = number of n in "Gauss" ('cause the first point of elements is omitted)
-n = 3; % number of points per segment (Gauss & LinSpace points)
-
-ContactPointfunc  = ContactPointSetting(PointsofInterest,n);
-Gapfunc = GapCalculationSetting(PointsofInterest, n);
 
 Body1.nElems.x = dx1;
 Body1.nElems.y = dy1;
@@ -50,6 +34,26 @@ Body2.nElems.y = dy2;
 
 Body1 = CreateFEMesh(DofsAtNode,Body1);
 Body2 = CreateFEMesh(DofsAtNode,Body2);
+
+%##################### Contact ############################
+% Options: None, Penalty, Lagrange
+approachBasis = "Penalty"; 
+
+% Subtypes
+% Penalty: Penalty, Nitshe-linear, Nitshe-nonlinear, Nitshe-nonlinear-all, Augumented Lagrange (Lagrange here is questionable, but makes implemnetation easier)   
+% Lagrange: Lagrange, Lagrange-nonlinear, perturbed Lagrangian, perturbed Lagrangian-nonlinear
+approachSubtype = "Penalty"; 
+
+approach = ApproachSettings(approachBasis, approachSubtype);
+
+PointsofInterest = "nodes"; % options: "nodes", "Gauss", "LinSpace" 
+% N.B.: "LinSpace" with n == 2 is equal to "nodes"; 
+% Number of "LinSpace" + 1 = number of n in "Gauss" ('cause the first point of elements is omitted)
+n = 3; % number of points per segment (Gauss & LinSpace points)
+
+ContactPointfunc  = ContactPointSetting(PointsofInterest,n);
+Gapfunc = GapCalculationSetting(PointsofInterest, n);
+
 % % %#################### BC  ###########################################
 Body1.loc.x = 0; 
 Body1.loc.y = 'all';  % Number (Location of nodes along the axis) or 'all' can be an option
@@ -102,37 +106,33 @@ Body2.contact.nodalid = FindGlobNodalID(Body2.P0,Body2.contact.loc,Body2.shift);
 imax=40;
 tol=1e-4;   
 type = "cubic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-steps= 20;
+steps= 10;
 
 % %#################### Processing ######################
 total_steps = 0;
 titertot=0;  
 for ii = 1:steps
-    
-        lambda_converged = false;
-        if (approach == 5) || (approach == 8) || (approach == 9) || (approach == 10)
-            lambda = 0;
-        else
-            lambda = zeros(Body1.ndof + Body2.ndof,1); % Lagrange item initiation
-        end
-       
+
+        approach = ApproachSettings(approachBasis, approachSubtype); % returning lambda and covergence to initial cond.
+
         Body1 = CreateFext(ii,steps,Body1,type);
         Body2 = CreateFext(ii,steps,Body2,type);
    
-        while (~lambda_converged) % special case for Augumented Lagrange            
+        while (~approach.lambda.converge) % special case for Augumented Lagrange    
+
             for jj = 1:imax % contact convergence
                 tic;
                 
                 total_steps = total_steps + 1;
                 
                 % interacation of two bodies
-                [Fc,Kc,GapNab,Gap] = Contact(Body1,Body2,pn,approach,ContactPointfunc,Gapfunc);
+                [Fc,Kc,GapNab,Gap] = Contact(Body1,Body2,approach,ContactPointfunc,Gapfunc);
     
                 % inner forces of the each body
                 Body1 = Elastic(Body1);
                 Body2 = Elastic(Body2);
                                        
-                [uu_bc, deltaf, lambda] = Assemblance(Body1, Body2, Fc,Kc,GapNab,approach,pn,lambda);
+                [uu_bc, deltaf, lambda_next] = Assemblance(Body1, Body2, Fc,Kc,GapNab,approach);
                         
                 % Displacement separation
                 Body1.u(Body1.bc) = Body1.u(Body1.bc) + uu_bc(1:Body1.ndof);
@@ -146,13 +146,13 @@ for ii = 1:steps
                 end  
             end
 
-            if approach == 7 
-
-                lambda_converged = ( norm(lambda_next - lambda) <= tol );             
-                lambda = lambda_next;     
+            if approachSubtype == "Augumented Lagrange"
+                approach.lambda.converge = ( norm(lambda_next - approach.lambda.meaning) <= tol );             
+                approach.lambda.meaning = lambda_next;     
 
             else
-                lambda_converged = true;                
+                approach.lambda.converge = true;
+
             end
 
         end
@@ -162,26 +162,4 @@ for ii = 1:steps
 
 end
 % %##################### Post-Processing ######################
-typeM = approachName(approach);
-fig_number = 1; 
-ShowNodeNumbers = true;
-fprintf('Static test, contact approach = %s  \n', typeM);
-PrintResults(Body1)
-PrintResults(Body2)
-gam = 1/pn;
-hold on 
-vis = "uy"; % options: "frame", "ux", "uy", "u_total", "sigma_xx", "sigma_yy", "sigma_xy" 
-Visualization(Body1,fig_number,vis,ShowNodeNumbers);
-Visualization(Body2,fig_number,vis,ShowNodeNumbers);
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% visualization of contact points and contact method
-[ContactPoints, ~] = ContactPointfunc(Body1);  
-h1 = plot(ContactPoints(:,1),ContactPoints(:,2),'ok','MarkerFaceColor', 'k', 'MarkerSize', 4);
-legend('contact points')
-legend(h1, 'contact points'); 
-gapStr = sprintf('%.5f', Gap);
-fullstr = "Method = " + typeM + ", Total Gap = " + gapStr;
-title(fullstr, 'Interpreter', 'latex');
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fprintf('total steps is %d  \n', total_steps );
-fprintf('total gap is %10.22f  \n', Gap )
+PostProcess;

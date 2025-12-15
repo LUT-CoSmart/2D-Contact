@@ -13,19 +13,18 @@ ContactPoints_Y =  ContactBody.q(xlocChosen(DofsAtNode_cont,ContactNode_cont,2))
 
 ContactPoints = [ContactPoints_X ContactPoints_Y]; % nodes of the contact body of the contact surfaces
 
+%% TODO: make it over all points simultaneously, working with array or in parallel  
 for ii = 1:size(ContactPoints,1) % loop over all contact points
   
     ContactPoint = ContactPoints(ii,:);
  
-    % Searchin the attributes of the corresponding point on the target surface 
+    % Search the attributes of the corresponding point on the target surface 
     Outcome = FindPoint(TargetBody,ContactPoint);
 
     % Checking the condition of the penalty approach
     if Outcome.Gap < 0 % we have meaningful outcome from the search
         Gap= Gap + abs(Outcome.Gap);   
     end   
-
-
 end
 
 

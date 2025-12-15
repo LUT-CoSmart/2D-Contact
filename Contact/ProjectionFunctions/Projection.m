@@ -17,7 +17,8 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
     TargetCoordsXi = [];
     TargetCoords = [];
     TargetDisp = [];
-
+    
+    %% TODO: make it over all points simultaneously, working with array or in parallel 
     for ii = 1:size(ContactPoints,1) % loop over all contact points
                 
         ContactPoint = ContactPoints(ii,:);  
@@ -27,8 +28,8 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
         % Checking the condition of the penalty approach
         if Outcome.Gap < 0 % we have meaningful results after the search
         
-            % negative because after penetration direction from contact point
-            % to its projection is opposite to outwards normal
+            % negative because after penetration direction is from contact point
+            % to its projection, which is an opposite to the outwards normal
             
             count = count + 1; % number of contact points
             gap = abs(Outcome.Gap);
@@ -43,7 +44,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
             % index - element under consideration
             Index = Outcome.Index;
             DOFpositions_targ = TargetBody.xloc(Index,:);
-            [X_targ,U_targ] = GetCoorDisp(Index,nloc_targ,TargetBody.P0,TargetBody.u);
+            [X_targ, U_targ] = GetCoorDisp(Index,nloc_targ,TargetBody.P0,TargetBody.u);
             [xi_targ,eta_targ] = FindIsoCoord(X_targ,U_targ,Outcome.Position); % finding isoparametric coodinates of the target point    
             vec_targ = [xi_targ; eta_targ];
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

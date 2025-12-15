@@ -1,4 +1,7 @@
-function [Fc,Kc,GapNab,Gap] = ContactVariation(Body1,Body2,penalty,approach,ContactPointfunc,Gapfunc)
+function [Fc,Kc,GapNab,Gap] = ContactVariation(Body1,Body2,approach,ContactPointfunc,Gapfunc)
+    
+    Type = approach.Type;
+    Name = approach.Name;
     
     sqrtEps = sqrt(eps);
     h = 2*sqrtEps;
@@ -20,12 +23,13 @@ function [Fc,Kc,GapNab,Gap] = ContactVariation(Body1,Body2,penalty,approach,Cont
     GapNab = zeros(nx,1);
     I_vec=zeros(nx,1);    
        
-    if (approach ~= 5) && (approach ~= 8) && (approach ~= 9) && (approach ~= 10) % all, but Lagrange multiplier
-        Fc= ContactForce(Body1,Body2,penalty,approach,ContactPointfunc); % Body1 forces from the projection of Body2          
-    else % Lagrange multiplier  methods  
+    if Type == "Penalty"
+        Fc= ContactForce(Body1,Body2,approach,ContactPointfunc); % Body1 forces from the projection of Body2          
+    else % Lagrange multiplier methods  
         Fc = zeros(nx,1); % we aren't interested in contact forces
     end
-        
+    
+    
     for ii = 1:nx
         % start variationing 
         I_vec(ii)=1;
@@ -34,24 +38,24 @@ function [Fc,Kc,GapNab,Gap] = ContactVariation(Body1,Body2,penalty,approach,Cont
         Body1.u = u1_backup - h*I_vec(1:Body1.nx); 
         Body2.u = u2_backup - h*I_vec(1+Body1.nx:end);
 
-        if (approach ~= 5) &&  (approach ~= 6) && (approach ~= 8) && (approach ~= 9) && (approach ~= 10) % Penalty-, Augmented Lagrange & Nitsche-based approaches
+        if Type == "Penalty" 
 
-            Fch = ContactForce(Body1,Body2,penalty,approach,ContactPointfunc); % force due to variation
+            Fch = ContactForce(Body1,Body2,approach,ContactPointfunc); % force due to variation
             Kc(:,ii) = (Fc - Fch) / h; 
         
-        elseif (approach == 6) || (approach == 5) || (approach == 8) || ... % very simplified Penalty & Lagrange multiplier & Lagrange multiplier (nonlinear constrain)
-               (approach == 9) || (approach == 10) % perturbed Lagrangian method & perturbed Lagrangian method (nonlinear constrain)
+        elseif Type == "Lagrange"
 
-            Gaph = Gapfunc(Body1,Body2);  % -i          
+            Gaph = Gapfunc(Body1,Body2);         
             GapNab(ii) = (Gap - Gaph)/h;         
                                         
-            if (approach == 8) || (approach == 10) 
+            if contains(Name, "nonlinear")
+
                 % Building Hessian
                 I_vec1 = zeros(nx,1); 
                 for jj = 1:nx
+                    
                     I_vec1(jj) = 1;
 
-                    % this split is to distribute coord. between bodies 
                     Body1.u = u1_backup - h*I_vec(1:Body1.nx) - h*I_vec1(1:Body1.nx); 
                     Body2.u = u2_backup - h*I_vec(1+Body1.nx:end) - h*I_vec1(1+Body1.nx:end);
                     Gaph_mm = Gapfunc(Body1,Body2);  % --   

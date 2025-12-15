@@ -33,10 +33,9 @@ function Result = FindPoint(Body,Point)
         % idea that on the edge, two nodes are uniquely belong to one element only 
         ElemenNumber = find(any(nloc == a, 2) & any(nloc == b, 2)); 
 
-        if ~isempty(ElemenNumber)
-            [X,U] = GetCoorDisp(ElemenNumber,nloc,Body.P0,Body.u); % position of nodes of the element     
-            % Position of the central point of the chosen element
-            central = Nm_2412(0,0)*(X+U);         
+        if ~isempty(ElemenNumber) % sanity check (probably need to be removed)
+            [X,U] = GetCoorDisp(ElemenNumber,nloc,Body.P0,Body.u); % position of nodes of the element                 
+            central = Nm_2412(0,0)*(X+U); % Position of the central point of the chosen element     
             % Finding external normal to the element (a central point helps identify the outward direction)
             Normal = Normal3points(central,position_a',position_b'); % outwards normal of element (algorithm doesn't depend on the order a and b)            
             info = [info; xy Normal ElemenNumber];
@@ -46,7 +45,7 @@ function Result = FindPoint(Body,Point)
 
     Result.Gap = 0; % we always have something to work with;
     
-    if isempty(info) == false % we actually have connection
+    if isempty(info) == false % we actually have contact
         
         % info extraction
         Position = info(:,1:2);
