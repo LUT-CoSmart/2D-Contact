@@ -53,7 +53,12 @@ function Result = FindPoint(Body,Point)
 
         % Saving
         Result.Index = info(:,5); % element on which point projected       
-        Result.Gap = (Point - Position) * Normal;  % gap calculation
+        Gap = (Point - Position) * Normal;  % gap calculation
+        if Gap >= 0 
+            Result.Gap = 0;
+        else
+            Result.Gap = Gap;
+        end
         Result.Normal = Normal; % normal on the surf.
         Result.Position = Position'; % point projection
 

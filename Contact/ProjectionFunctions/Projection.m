@@ -17,7 +17,7 @@ function [count, ContactGeometry, TargetGeometry, Gap, Normal] = Projection(Cont
     TargetCoordsXi = [];
     TargetCoords = [];
     TargetDisp = [];
-    
+       
     %% TODO: make it over all points simultaneously, working with array or in parallel 
     for ii = 1:size(ContactPoints,1) % loop over all contact points
                 

@@ -1,24 +1,22 @@
-function [Fc,Kc,GapNab,Gap] = Contact(Body1,Body2,approach,ContactPointfunc,Gapfunc)
+function [DofsFunction, Stiffness] = Contact(Body1,Body2,approach)
 
-% Initialize the gap 
-Gap = 0;
 
-% Initialize the global contact forces
-Fc = zeros(Body1.nx + Body2.nx,1);
+if approach.Type ~= "None" % we have contact algorithm     
+    AimFunction = approach.AimFunction;  
+    DofsFunction = AimFunction(Body1,Body2);
+    switch approach.perturbation 
+        case "automatic"
+            DofsFunction_y = @(t,y) AimFunctionWrapper(t,y,Body1,Body2,AimFunction);
+            Stiffness = numjac(DofsFunction_y, 0,  [Body1.u(:); Body2.u(:)], DofsFunction, 1e-5, []);
+            
+        case "incremental"    
+            Stiffness = Jac_stepwise(Body1,Body2,AimFunction);
+    end       
 
-% Initialize the stiffnesses
-Kc = zeros(Body1.nx + Body2.nx, Body1.nx + Body2.nx);
-
-% Initialize the gap variation
-GapNab = zeros(Body1.nx + Body2.nx,1);
-
-% Initialize the gap distribution 
-% GapDOFs = zeros(Body1.nx + Body2.nx,1);
-
-if approach.Type ~= "None" % we have contact algorithm    
-    addpath("Contact\ProjectionFunctions")
-    [Fc,Kc,GapNab,Gap] = ContactVariation(Body1,Body2,approach,ContactPointfunc,Gapfunc);    
-    
+else
+    DOFsNumber = Body1.nx + Body2.nx;
+    DofsFunction = zeros(DOFsNumber,1);
+    Stiffness = zeros(DOFsNumber);
 end
 
 

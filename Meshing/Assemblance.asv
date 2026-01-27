@@ -4,7 +4,7 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
     Name = approach.Name;
     lambda = approach.lambda.meaning; % keeping just for standard Lagrange method
     penalty = approach.penalty;
-    approach.lambda.converge = true;
+
     bc = [Body1.bc Body2.bc]; % total logical vector of constrains
     Fext = [Body1.Fext.vec; Body2.Fext.vec]; % Assemblance of external forces
     
@@ -20,8 +20,7 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
     Ke_bc = Ke(bc,bc);  
     ff_bc = ff(bc);
     Fext_bc = Fext(bc);
-    
-    % Methods
+    % Methodsh
     switch Type
         case "Lagrange"
             m = size(Stiffness,1);
@@ -39,18 +38,21 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
                      Stiffness  Matrix_add]; 
             ff_bc = [ff_bc; zeros(m,1)];
         
-     
+        
+
         otherwise % "Penalty" and "None"
             ff_bc = ff_bc + DofsFunction(bc);
             K_bc = Ke_bc + Stiffness(bc,bc);
             
-            if Name == "Augumented Lagrange"
-                ff_bc = ff_bc + lambda; % contributions from the updated contact forces after the previous iteration
-                lambda = lambda + DofsFunction(bc); 
-            end
-
+            case "Augumented Lagrange"
+            ff_bc = ff_bc + lambda; % contributions from the updated contact forces after the previous iteration
+            lambda = lambda + Fc([Body1.bc Body2.bc]); 
+            K_bc = Ke_bc + Kc_bc; % standard stiffness matrices assemblance 
+            
     end    
+
     
+
     uu_bc = -K_bc\ff_bc; 
     deltaf = ff_bc(1:size(Ke_bc,1))/norm(Fext_bc);
     uu_bc = uu_bc(1:Body1.ndof + Body2.ndof); % removing potential additional DOFs from Lagrange-based approaches
