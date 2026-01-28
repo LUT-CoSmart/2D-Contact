@@ -7,7 +7,7 @@ function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointf
 
        approach.perturbation = "incremental";  
 
-       allowed = ["Lagrange","Lagrange-nonlinear", "perturbed Lagrangian","perturbed Lagrangian-nonlinear"];  
+       allowed = ["Lagrange","perturbed Lagrange"];  
 
        if ~any(approachSubtype == allowed)
           warning("Invalid approachSubtype for approachBasis='Lagrange, substituted to Lagrange'");

@@ -20,10 +20,10 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 4;
+dx1 = 8;
 dy1 = 1;
 
-dx2 = 3;
+dx2 = 8;
 dy2 = 1;
 
 Body1.nElems.x = dx1;
@@ -88,18 +88,18 @@ Body2.contact.nodalid = FindGlobNodalID(Body2.P0,Body2.contact.loc,Body2.shift);
 approachBasis = "Penalty"; 
 % Subtypes
 % Penalty: Penalty, Nitshe-linear, Nitshe-nonlinear, Nitshe-nonlinear-all, Augumented Lagrange (Lagrange here is questionable, but makes implemnetation easier)   
-% Lagrange: Lagrange, perturbed Lagrangian
-approachSubtype = "Augumented Lagrange"; 
-PointsofInterest.Name = "LinSpace"; % options: "nodes", "Gauss", "LinSpace" 
+% Lagrange: Lagrange, perturbed Lagrange
+approachSubtype = "Lagrange"; 
+PointsofInterest.Name = "Gauss"; % options: "nodes", "Gauss", "LinSpace" 
 PointsofInterest.n = 3; % number of points per segment (Gauss & LinSpace points)
 [ContactPointfunc, Gapfunc, GapfuncPairs]  = ContactPointSetting(PointsofInterest);
 approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs);
 
 %##################### Newton iter. parameters ######################
 imax=30;
-tol=1e-3;   
+tol=1e-4;   
 type = "linear"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-steps= 10;
+steps= 3;
 
 % %#################### Processing ######################
 total_steps = 0;
@@ -138,7 +138,7 @@ for ii = 1:steps
             end
 
             if approachSubtype == "Augumented Lagrange"
-                approach.lambda.converge = ( norm(lambda_next - approach.lambda.meaning) <= tol );             
+                approach.lambda.converge = ( all(lambda_next - approach.lambda.meaning < tol ) || Gap < tol*1e2); 
                 approach.lambda.meaning = lambda_next; 
             else
                 approach.lambda.converge = true;

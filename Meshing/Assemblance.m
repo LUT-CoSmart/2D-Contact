@@ -28,7 +28,7 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
             Stiffness = Stiffness(:,bc);
             
             switch Name 
-                case "perturbed Lagrangian"
+                case "perturbed Lagrange"
                     Matrix_add = -1/penalty * ones(m);
 
                 case "Lagrange" 
@@ -46,7 +46,7 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
             
             if Name == "Augumented Lagrange"
                 ff_bc = ff_bc + lambda; % contributions from the updated contact forces after the previous iteration
-                lambda = lambda + DofsFunction(bc); 
+                lambda = lambda + 0.25 * DofsFunction(bc); 
             end
 
     end    
