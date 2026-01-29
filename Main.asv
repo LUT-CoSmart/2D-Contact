@@ -20,10 +20,10 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 10;
+dx1 = 5;
 dy1 = 1;
 
-dx2 = 20;
+dx2 = 10;
 dy2 = 1;
 
 Body1.nElems.x = dx1;
@@ -98,8 +98,8 @@ approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, Gap
 
 %##################### Newton iter. parameters ######################
 imax=20;
-tol=1e-3;   
-type = "cubic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
+tol=1e-4;   
+type = "quadratic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
 steps= 10;
 
 % %#################### Processing ######################

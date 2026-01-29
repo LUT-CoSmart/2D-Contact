@@ -1,9 +1,8 @@
  
-function Visualization(Body,fig_number,vis, ShowNodeNumbers)
+function Visualization(Body,vis, ShowNodeNumbers)
     
     FontSize = 10;
     DofsAtNode = Body.DofsAtNode;
-    figure(fig_number)
     
     if vis ~= "frame"
         node = reshape(Body.q + Body.u, 2, []).';

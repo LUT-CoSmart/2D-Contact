@@ -1,7 +1,8 @@
-function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs, Perturbation)
+function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointfunc, GapfuncPairs, Perturbation)
 
     approach.penalty = 1e10;  
     approach.perturbation = Perturbation;
+
     % sanity check, that approach and subtype are correlating 
     if approachBasis == "Lagrange"
        
@@ -13,7 +14,6 @@ function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointf
        end
 
        approach.Name = approachSubtype; 
-       %AimFunction = Gapfunc;
        AimFunction = GapfuncPairs; 
 
     elseif approachBasis == "Penalty"
@@ -36,7 +36,8 @@ function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointf
         approach.Type = "None";
         warning("Contact is not activated");
         AimFunction = "None";
-        approachBasis = "None";    
+        approachBasis = "None"; 
+        approach.Name = "None";
     end  
 
     approach.Type = approachBasis;   

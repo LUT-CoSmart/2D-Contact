@@ -1,4 +1,4 @@
-function [Body1, Body2, uu_bc, deltaf, lambda, ff_bc, K_bc] = Assemblance(Body1,Body2,DofsFunction,Stiffness,approach)
+function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFunction,Stiffness,approach)
     
     Type = approach.Type;
     Name = approach.Name;

@@ -13,5 +13,5 @@ function [ContactPointfunc, Gapfunc, GapfuncPairs] = ContactPointSetting(Pointso
     end
     
     ContactPointfunc =  @(ContactBody) ContactPointsFunction(ContactBody,ContactPoints,n);
-    Gapfunc = @(ContactBody,TargetBody) GapCalculationFunction(ContactBody,TargetBody,ContactPoints,n); 
+    Gapfunc = @(ContactBody,TargetBody) InnerGapCalculation(ContactBody,TargetBody,ContactPoints,n); 
     GapfuncPairs = @(ContactBody,TargetBody) GapCalculationFunctionPairs(ContactBody,TargetBody,ContactPoints,n);
