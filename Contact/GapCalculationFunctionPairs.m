@@ -9,6 +9,6 @@ function Gap = GapCalculationFunctionPairs(ContactBody,TargetBody,ContactPointsN
         ContactPoint = ContactPoints(ii,:);
      
         % Search the attributes of the corresponding point on the target surface 
-        Outcome = FindPoint(TargetBody,ContactPoint);
-        Gap(ii) = abs(Outcome.Gap);              
+        Outcome = FindPoint(TargetBody,ContactPoint);     
+        Gap(ii) = Outcome.Gap;
     end

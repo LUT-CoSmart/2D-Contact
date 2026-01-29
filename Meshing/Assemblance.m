@@ -1,4 +1,4 @@
-function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFunction,Stiffness,approach)
+function [Body1, Body2, uu_bc, deltaf, lambda, ff_bc, K_bc] = Assemblance(Body1,Body2,DofsFunction,Stiffness,approach)
     
     Type = approach.Type;
     Name = approach.Name;
@@ -25,8 +25,8 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
     switch Type
         case "Lagrange"
             m = size(Stiffness,1);
-            Stiffness = Stiffness(:,bc);
-            
+            Stiffness_bc = Stiffness(:,bc);
+
             switch Name 
                 case "perturbed Lagrange"
                     Matrix_add = -1/penalty * ones(m);
@@ -34,19 +34,18 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
                 case "Lagrange" 
                     Matrix_add = zeros(m);
             end
-                        
-            K_bc = [     Ke_bc Stiffness';
-                     Stiffness  Matrix_add]; 
+
+            K_bc = [        Ke_bc Stiffness_bc';
+                     Stiffness_bc  Matrix_add]; 
             ff_bc = [ff_bc; zeros(m,1)];
-        
-     
+            
         otherwise % "Penalty" and "None"
             ff_bc = ff_bc + DofsFunction(bc);
             K_bc = Ke_bc + Stiffness(bc,bc);
             
             if Name == "Augumented Lagrange"
                 ff_bc = ff_bc + lambda; % contributions from the updated contact forces after the previous iteration
-                lambda = lambda + 0.25 * DofsFunction(bc); 
+                lambda = lambda + DofsFunction(bc); 
             end
 
     end    
@@ -58,3 +57,5 @@ function [Body1, Body2, uu_bc, deltaf, lambda] = Assemblance(Body1,Body2,DofsFun
     % Displacement separation
     Body1.u(Body1.bc) = Body1.u(Body1.bc) + uu_bc(1:Body1.ndof);
     Body2.u(Body2.bc) = Body2.u(Body2.bc) + uu_bc(Body1.ndof + 1:end);
+
+   

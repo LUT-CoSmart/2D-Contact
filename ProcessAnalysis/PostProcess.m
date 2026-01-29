@@ -26,5 +26,4 @@ fullstr = "Method = " + approach.Name + ", Total Gap = " + gapStr;
 title(fullstr, 'Interpreter', 'latex');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 fprintf('total steps is %d  \n', total_steps );
-fprintf('total gap is %10.22f  \n', Gap )
-Gapfunc(Body1,Body2)
+fprintf('total abs gap is %10.22f  \n', Gap )

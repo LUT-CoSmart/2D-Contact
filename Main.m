@@ -20,10 +20,10 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 8;
+dx1 = 5;
 dy1 = 1;
 
-dx2 = 8;
+dx2 = 5;
 dy2 = 1;
 
 Body1.nElems.x = dx1;
@@ -48,7 +48,7 @@ Body2 = CreateBC(Body2);
 %##################### Loadings ######################
 % local positions (assuming all bodies in (0,0) )
 Body1.Fext.x = 0; 
-Body1.Fext.y =-62.5*10^7;
+Body1.Fext.y = -62.5*10^7;
 
 
 Body1.Fext.loc.x = Body1.Lx;
@@ -91,15 +91,16 @@ approachBasis = "Penalty";
 % Lagrange: Lagrange, perturbed Lagrange
 approachSubtype = "Lagrange"; 
 PointsofInterest.Name = "Gauss"; % options: "nodes", "Gauss", "LinSpace" 
-PointsofInterest.n = 3; % number of points per segment (Gauss & LinSpace points)
+PointsofInterest.n = 2; % number of points per segment (Gauss & LinSpace points)
 [ContactPointfunc, Gapfunc, GapfuncPairs]  = ContactPointSetting(PointsofInterest);
-approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs);
+Perturbation = "automatic"; % Options: "automatic", "incremental"
+approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs, Perturbation);
 
 %##################### Newton iter. parameters ######################
-imax=30;
-tol=1e-4;   
-type = "linear"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-steps= 3;
+imax=20;
+tol=1e-3;   
+type = "cubic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
+steps= 5;
 
 % %#################### Processing ######################
 total_steps = 0;
@@ -122,25 +123,25 @@ for ii = 1:steps
                 % interaction of two bodies
                 [DofsFunction, Stiffness] = Contact(Body1,Body2,approach);
 
-                Gap = Gapfunc(Body1,Body2);
+                Gap = InnerGap(GapfuncPairs,Body1,Body2);
                 % inner forces of the each body
                 Body1 = Elastic(Body1);
                 Body2 = Elastic(Body2);
 
-                [Body1, Body2, uu_bc, deltaf, lambda_next] = Assemblance(Body1, Body2, DofsFunction, Stiffness,approach);
+                [Body1, Body2, uu_bc, deltaf, lambda_next, ff_bc, K_bc] = Assemblance(Body1, Body2, DofsFunction, Stiffness,approach);
               
                 titer=toc;
                 titertot=titertot+titer;
 
-                if printStatus(deltaf, uu_bc, tol, ii, jj, imax, steps, titertot, Gap)
+                if printStatus(approachBasis, deltaf, uu_bc, tol, ii, jj, imax, steps, titertot, Gap)
                     break;  
                 end  
             end
 
             if approachSubtype == "Augumented Lagrange"
-                approach.lambda.converge = ( all(lambda_next - approach.lambda.meaning < tol ) || Gap < tol*1e2); 
-                approach.lambda.meaning = lambda_next; 
-            else
+                approach.lambda.converge = ( all(abs(lambda_next - approach.lambda.meaning) < tol ) || Gap < tol*1e1); 
+                approach.lambda.meaning = lambda_next;
+            else 
                 approach.lambda.converge = true;
             end
 

@@ -1,12 +1,10 @@
-function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs)
+function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointfunc, Gapfunc, GapfuncPairs, Perturbation)
 
     approach.penalty = 1e10;  
-    
+    approach.perturbation = Perturbation;
     % sanity check, that approach and subtype are correlating 
     if approachBasis == "Lagrange"
-
-       approach.perturbation = "incremental";  
-
+       
        allowed = ["Lagrange","perturbed Lagrange"];  
 
        if ~any(approachSubtype == allowed)
@@ -15,12 +13,10 @@ function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointf
        end
 
        approach.Name = approachSubtype; 
-       % AimFunction = Gapfunc;
+       %AimFunction = Gapfunc;
        AimFunction = GapfuncPairs; 
 
     elseif approachBasis == "Penalty"
-
-        approach.perturbation = "automatic";
 
         allowed = ["Penalty", "Nitshe-linear", "Nitshe-nonlinear", "Nitshe-nonlinear-all", "Augumented Lagrange"];
         
@@ -30,7 +26,7 @@ function approach = ApproachSettings(approachBasis,approachSubtype,ContactPointf
         end
 
         if approachSubtype == "Augumented Lagrange"
-            approach.penalty = 1e9;  % decreasing parameter for better stability, method operates with any small penalty 
+            approach.penalty = 1e8;  % decreasing parameter for better stability, method operates with any small penalty 
         end
 
         approach.Name = approachSubtype; 

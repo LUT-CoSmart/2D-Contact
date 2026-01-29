@@ -19,6 +19,7 @@ function Fc = ContactForce(ContactBody,TargetBody,approach,ContactPointfunc)
             xi_targ = TargetGeometry.CoordsXi(:,i);
             
             Gap = Gaps(i);
+            
             Normal = Normals(:,i);
             
             Normal_cont = -Normal;

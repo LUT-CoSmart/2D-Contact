@@ -11,8 +11,7 @@ if approach.Type ~= "None" % we have contact algorithm
             
         case "incremental"    
             Stiffness = Jac_stepwise(Body1,Body2,AimFunction);
-    end       
-
+    end    
 else
     DOFsNumber = Body1.nx + Body2.nx;
     DofsFunction = zeros(DOFsNumber,1);
