@@ -20,11 +20,11 @@ Body2.shift.x = 0;
 Body2.shift.y = -Body2.Ly;
 
 %#################### Mesh #########################################
-dx1 = 10;
-dy1 = 1;
+dx1 = 8;
+dy1 = 2;
 
-dx2 = 20;
-dy2 = 1;
+dx2 = 14;
+dy2 = 2;
 
 Body1.nElems.x = dx1;
 Body1.nElems.y = dy1;
@@ -48,7 +48,7 @@ Body2 = CreateBC(Body2);
 %##################### Loadings ######################
 % local positions (assuming all bodies in (0,0) )
 Body1.Fext.x = 0; 
-Body1.Fext.y = -62.5*10^7;
+Body1.Fext.y = -3*10^8;
 
 
 Body1.Fext.loc.x = Body1.Lx;
@@ -91,7 +91,14 @@ approachBasis = "Lagrange";
 % Lagrange: Lagrange, perturbed Lagrange
 approachSubtype = "Lagrange"; 
 PointsofInterest.Name = "Gauss"; % options: "nodes", "Gauss", "LinSpace" 
-PointsofInterest.n = 2; % number of points per segment (Gauss & LinSpace points)
+PointsofInterest.n = 1; % number of points per segment (Gauss & LinSpace points)
+
+% ==============================================================================================================
+% For Lagrange-based methods, a large number of contact points can lead to an overconstrained solution.
+% The reasoning is as follows. The points can be projected over several elements of the target body, which shape functions are linear.
+% That makes several consequenced elements be in one line. The same reason is to have coarser mesh for the contact body than the target one.  
+% ==============================================================================================================
+
 [ContactPointfunc, Gapfunc, GapfuncPairs]  = ContactPointSetting(PointsofInterest);
 Perturbation = "automatic"; % Options: "automatic", "incremental"
 approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, GapfuncPairs, Perturbation);
@@ -100,7 +107,7 @@ approach = ApproachSettings(approachBasis, approachSubtype,ContactPointfunc, Gap
 imax=20;
 tol=1e-3;   
 type = "cubic"; % Update forces, supported loading types: linear, exponential, quadratic, cubic;
-steps= 10;
+steps= 20;
 
 % %#################### Processing ######################
 total_steps = 0;
@@ -150,7 +157,7 @@ for ii = 1:steps
 end
 % %##################### Post-Processing ######################
 ShowVisualization = true;
-ShowNodeNumbers = true;
+ShowNodeNumbers = false;
 WhatoToShow = "u_total"; % options: "ux", "uy", "u_total", "sigma_xx", "sigma_yy", "sigma_xy" 
 PostProcess(Body1, Body2, ShowVisualization, WhatoToShow, ShowNodeNumbers, approach, ContactPointfunc, Gapfunc);
 

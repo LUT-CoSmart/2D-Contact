@@ -7,7 +7,7 @@ if approach.Type ~= "None" % we have contact algorithm
     switch approach.perturbation 
         case "automatic"
             DofsFunction_y = @(t,y) AimFunctionWrapper(t,y,Body1,Body2,AimFunction);
-            Stiffness = numjac(DofsFunction_y, 0,  [Body1.u(:); Body2.u(:)], DofsFunction, 1e-5, []);
+            Stiffness = numjac(DofsFunction_y, 0,  [Body1.u(:); Body2.u(:)], DofsFunction, 1e-3, []);
             
         case "incremental"    
             Stiffness = Jac_stepwise(Body1,Body2,AimFunction);

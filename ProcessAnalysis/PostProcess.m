@@ -1,6 +1,7 @@
 function PostProcess(Body1, Body2, ShowVisualization, vis, ShowNodeNumbers, approach, ContactPointfunc, Gapfunc)
 
-fprintf('Static test, contact approach = %s  \n', approach.Name);
+% fprintf('Static test, contact approach = %s  \n', approach.Name);
+
 PrintResults(Body1)
 PrintResults(Body2)
 
